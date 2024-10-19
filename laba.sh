@@ -1,7 +1,10 @@
 #!/bin/bash
+
 #Принимаем в качестве аргумента путь к папке
 dir="$1"
+
 #Проверяем существование папки
+#-d - is a directory(-f - is a file)
 if [ -d "$dir" ];
 then
  echo "Folder exists, resuming work..."
@@ -11,7 +14,7 @@ else
   echo "Folder doesn't exists, try again or enter EXIT."
   read dir
   
-  if [[ "$dir" == "EXIT" ]]; then
+  if [[ "$diC:\Users\lalis\Downloads\thesoundofmusicreading.pdfr" == "EXIT" ]]; then
    echo "Exiting the programm.."
    exit 0
   fi
@@ -20,9 +23,30 @@ else
  echo "Folder exists, resuming work..."
 fi
 
+
 #Создание ограниченной папки - 10MB, потому что так захотелось
 
+#dd - копирование блочных данных с устройства /dev/zero(спец файл - источник  нулевых байтов)
+#в файл образа диска; bs - сколько байт читать и записывать
+#count - скопировать указанное кол-во блоков, размера bs
+dd if=/dev/zero of=limit.img bs=1M count=10
 
+#создаём файловую систему на нашем образе диска
+mkfs.ext4 limit.img
+
+#создаём маунт поинт
+sudo mkdir /mnt/limited_fol
+
+#и примаунтиваем
+#--options loop - используем loop device(ненастоящее устройство-просто файл) в качестве блочного устройства
+#т.к хотим примонтировать файл - образ диска, а не устройство
+sudo mount -o loop limit.img /mnt/limited_fol
+
+#передвигаем нашу директорию в ограниченную папку с помощью move
+sudo mv $dir /mnt/limited_fol
+
+#создаём soft-link(symbolic),чтобы можно было работать из изначального места
+ln -s /mnt/limited_fol $dir
 
 
 #Считаем размер папки
@@ -90,7 +114,11 @@ else
 fi
 
 #Убираем маунт и удаляем образ диска
-
-
-
-
+#убираем созданную ссылку
+unlink $dir
+#размонтируем
+sudo umount /mnt/limited_fol
+#Удаляем маунт поинт, созданный ранее
+#sudo rmdir /mnt/limited_fol
+#Удаляем созданный образ диск
+rm limit.img

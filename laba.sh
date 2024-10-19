@@ -13,7 +13,7 @@ else
  do
   echo "Folder doesn't exists, try again or enter EXIT."
   read dir
-  
+
   if [[ "$dir" == "EXIT" ]]; then
    echo "Exiting the programm.."
    exit 0
@@ -116,7 +116,7 @@ fi
 
 #Убираем маунт и удаляем образ диска
 #убираем созданную ссылку
-sudo rm $dir/$name
+sudo rm "$dir"
 #размонтируем
 sudo umount /mnt/limited_fol
 #Удаляем маунт поинт, созданный ранее

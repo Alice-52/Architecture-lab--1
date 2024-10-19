@@ -120,6 +120,7 @@ sudo rm "$dir"
 #размонтируем
 sudo umount /mnt/limited_fol
 #Удаляем маунт поинт, созданный ранее
+sudo rm -r /mnt/limited_fol/$name
 sudo rmdir /mnt/limited_fol
 #Удаляем созданный образ диск
 rm limit.img

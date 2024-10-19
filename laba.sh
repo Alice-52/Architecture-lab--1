@@ -71,7 +71,22 @@ if [ "$folder_size" -gt "$border" ]; then
 
       if [[ "$b_dir" == "EXIT" ]]; then
         echo "Exiting the program..."
-        exit 0
+        # Убираем созданную символическую ссылку
+	sudo rm "$dir"
+
+	# Удаляем перемещённую папку
+	sudo rm -r /mnt/limited_fol/"$name"
+
+	# Размонтируем файловую систему
+	sudo umount /mnt/limited_fol
+
+	# Удаляем маунт поинт
+	sudo rmdir /mnt/limited_fol
+
+	# Удаляем созданный образ диска
+	rm limit.img
+
+	exit 0
       fi
     done
     echo "Folder exists, resuming work..."
@@ -83,6 +98,20 @@ if [ "$folder_size" -gt "$border" ]; then
 
   if [ -z "$old_files" ]; then
     echo "Archive list is empty"
+# Убираем созданную символическую ссылку
+sudo rm "$dir"
+
+# Удаляем перемещённую папку
+sudo rm -r /mnt/limited_fol/"$name"
+
+# Размонтируем файловую систему
+sudo umount /mnt/limited_fol
+
+# Удаляем маунт поинт
+sudo rmdir /mnt/limited_fol
+
+# Удаляем созданный образ диска
+rm limit.img
     exit 0
   fi
 

@@ -29,7 +29,7 @@ fi
 #dd - копирование блочных данных с устройства /dev/zero(спец файл - источник  нулевых байтов)
 #в файл образа диска; bs - сколько байт читать и записывать
 #count - скопировать указанное кол-во блоков, размера bs
-dd if=/dev/zero of=limit.img bs=G count=2
+dd if=/dev/zero of=limit.img bs=1G count=2
 
 #создаём файловую систему на нашем образе диска
 mkfs.ext4 limit.img
@@ -41,6 +41,7 @@ sudo mkdir /mnt/limited_fol
 #--options loop - используем loop device(ненастоящее устройство-просто файл>#т.к хотим примонтировать файл - образ диска, а не устройство
 sudo mount -o loop limit.img /mnt/limited_fol
 
+#Выделяем имя папки для создания ссылки
 name="$(basename "$dir")"
 
 #передвигаем нашу директорию в ограниченную папку с помощью move
@@ -48,7 +49,6 @@ sudo mv $dir /mnt/limited_fol
 
 #создаём soft-link(symbolic),чтобы можно было работать из изначального места
 ln -s /mnt/limited_fol/$name $dir
-#ls -l /mnt/limited_fol
 
 
 #Считаем размер папки

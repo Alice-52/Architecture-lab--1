@@ -37,17 +37,17 @@ mkfs.ext4 limit.img
 #создаём маунт поинт
 sudo mkdir /mnt/limited_fol
 
-#и примаунтиваем
-#--options loop - используем loop device(ненастоящее устройство-просто файл) в качестве блочного устройства
-#т.к хотим примонтировать файл - образ диска, а не устройство
-sudo mount -o loop limit.img /mnt/limited_fol
-
 #передвигаем нашу директорию в ограниченную папку с помощью move
 sudo mv $dir /mnt/limited_fol
 
 #создаём soft-link(symbolic),чтобы можно было работать из изначального места
 ln -s /mnt/limited_fol $dir
+#ls -l /mnt/limited_fol
 
+#и примаунтиваем
+#--options loop - используем loop device(ненастоящее устройство-просто файл) в качестве блочного устройства
+#т.к хотим примонтировать файл - образ диска, а не устройство
+sudo mount -o loop limit.img /mnt/limited_fol
 
 #Считаем размер папки
 let "folder_size = $(du -s $dir | cut -f1) / 100"
@@ -115,7 +115,7 @@ fi
 
 #Убираем маунт и удаляем образ диска
 #убираем созданную ссылку
-unlink $dir
+#unlink $dir
 #размонтируем
 sudo umount /mnt/limited_fol
 #Удаляем маунт поинт, созданный ранее

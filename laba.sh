@@ -14,7 +14,7 @@ else
   echo "Folder doesn't exists, try again or enter EXIT."
   read dir
   
-  if [[ "$diC:\Users\lalis\Downloads\thesoundofmusicreading.pdfr" == "EXIT" ]]; then
+  if [[ "$dir" == "EXIT" ]]; then
    echo "Exiting the programm.."
    exit 0
   fi
@@ -29,7 +29,7 @@ fi
 #dd - копирование блочных данных с устройства /dev/zero(спец файл - источник  нулевых байтов)
 #в файл образа диска; bs - сколько байт читать и записывать
 #count - скопировать указанное кол-во блоков, размера bs
-dd if=/dev/zero of=limit.img bs=1M count=10
+dd if=/dev/zero of=limit.img bs=1G count=2
 
 #создаём файловую систему на нашем образе диска
 mkfs.ext4 limit.img
@@ -37,22 +37,23 @@ mkfs.ext4 limit.img
 #создаём маунт поинт
 sudo mkdir /mnt/limited_fol
 
+#и примаунтиваем
+#--options loop - используем loop device(ненастоящее устройство-просто файл>#т.к хотим примонтировать файл - образ диска, а не устройство
+sudo mount -o loop limit.img /mnt/limited_fol
+
+
 #передвигаем нашу директорию в ограниченную папку с помощью move
-sudo mv $dir /mnt/limited_fol
+sudo cp -r $dir /mnt/limited_fol
 
 #создаём soft-link(symbolic),чтобы можно было работать из изначального места
 ln -s /mnt/limited_fol $dir
 #ls -l /mnt/limited_fol
 
-#и примаунтиваем
-#--options loop - используем loop device(ненастоящее устройство-просто файл) в качестве блочного устройства
-#т.к хотим примонтировать файл - образ диска, а не устройство
-sudo mount -o loop limit.img /mnt/limited_fol
 
 #Считаем размер папки
 let "folder_size = $(du -s $dir | cut -f1) / 100"
 
-echo "The size of the folder is, out of 10M we've limited your folder to :) "
+echo "The size of the folder is, out of 2G we've limited your folder to :) "
 du -sh $dir
 
 #Берём проценты для архивирования
@@ -119,6 +120,6 @@ fi
 #размонтируем
 sudo umount /mnt/limited_fol
 #Удаляем маунт поинт, созданный ранее
-#sudo rmdir /mnt/limited_fol
+sudo rmdir /mnt/limited_fol
 #Удаляем созданный образ диск
 rm limit.img

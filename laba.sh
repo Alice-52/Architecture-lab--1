@@ -19,8 +19,12 @@ else
   echo "Folder exists, resuming work..."
 fi
 
-# Создание ограниченной папки - 2 ГБ
-dd if=/dev/zero of=limit.img bs=1G count=2
+#Спрашиваем, насколько ограничить
+echo "How many M for your folder?"
+read lim
+
+# Создание ограниченной папки
+dd if=/dev/zero of=limit.img bs=1M count="$lim"
 
 # Создаём файловую систему на нашем образе диска
 mkfs.ext4 limit.img
@@ -41,10 +45,11 @@ sudo mv "$dir" /mnt/limited_fol
 ln -s /mnt/limited_fol/"$name" "$dir"
 
 # Считаем размер папки
-folder_size=$(du -sL "$dir" | cut -f1)
-folder_size=$((folder_size / 2048))  # Преобразуем в мегабайты
+folder_size=$( du -sL "$dir" | cut -f1 )
+folder_size=$(( folder_size / $lim ))
+folder_size=$(( folder_size / 10 ))  # Преобразуем в мегабайты
 
-echo "The size of the folder is, out of 2G we've limited your folder to :)"
+echo "The size of the folder is, out of "$lim"MB we've limited your folder to :)"
 du -shL "$dir"
 
 # Процент заполнения папки
@@ -93,40 +98,41 @@ if [ "$folder_size" -gt "$border" ]; then
   fi
 
   # Находим старые файлы
-  old_files=$(find "$dir" -type f -printf '%T+ %p\n' | sort | head -n "$amount" | cut -d ' ' -f 2-)
+  old_files=$(find /mnt/limited_fol/"$name" -type f -printf '%T+ %p\n' | sort | head -n "$amount" | cut -d ' ' -f 2-)
+
   echo "LIST: $old_files"
 
   if [ -z "$old_files" ]; then
     echo "Archive list is empty"
-# Убираем созданную символическую ссылку
-sudo rm "$dir"
+	# Убираем созданную символическую ссылку
+	sudo rm -r "$dir"
 
-# Удаляем перемещённую папку
-sudo rm -r /mnt/limited_fol/"$name"
+	# Удаляем перемещённую папку
+	sudo rm -r /mnt/limited_fol/"$name"
 
-# Размонтируем файловую систему
-sudo umount /mnt/limited_fol
+	# Размонтируем файловую систему
+	sudo umount /mnt/limited_fol
 
-# Удаляем маунт поинт
-sudo rmdir /mnt/limited_fol
+	# Удаляем маунт поинт
+	sudo rmdir /mnt/limited_fol
 
-# Удаляем созданный образ диска
-rm limit.img
+	# Удаляем созданный образ диска
+	rm limit.img
     exit 0
   fi
 
   # Создаём архив и удаляем старые файлы
   just_file="$b_dir/backup_$(date +%Y%m%d_%H%M%S).tar.gz"
-  tar -czf "$just_file" "$old_files"
+  tar -czf "$just_file" $old_files
 
-  rm "$old_files"
+  rm $old_files
   echo "Archivation done to $just_file and removed from $dir"
 else
   echo "Your folder is not that full, exiting the program."
 fi
 
 # Убираем созданную символическую ссылку
-sudo rm "$dir"
+sudo rm -r "$dir"
 
 # Удаляем перемещённую папку
 sudo rm -r /mnt/limited_fol/"$name"

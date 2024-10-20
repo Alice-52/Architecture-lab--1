@@ -24,7 +24,7 @@ fi
 # Создание ограниченной папки
 
 #Спрашиваем, насколько ограничить
-#echo "How many megabytes for your folder?"
+echo "How many megabytes for your folder?"
 read lim
 
 #dd - копирование блочных данных с устройства /dev/zero(спец файл - источник  нулевых байтов)
@@ -127,7 +127,7 @@ if [ "$folder_size" -gt "$border" ]; then
   # -f 2- начинаем со второго поля, т.к. первое это дата
   old_files=$(find /mnt/limited_fol/"$name" -type f -printf '%T+ %p\n' | sort | head -n "$amount" | cut -d ' ' -f 2-)
 
-  echo "LIST:\n $old_files"
+  echo -e "LIST:\n $old_files"
 
   # Проверяем не пустой ли
   if [ -z "$old_files" ]; then

@@ -27,6 +27,33 @@ fi
 echo "How many megabytes for your folder?"
 read lim
 
+#Считаем размер папки для предупреждения
+dum_size=$( du -s "$dir" | cut -f1 )
+dum_size=$(( dum_size / 1024 ))
+
+#Предупреждение
+if [ "$dum_size" -gt "$lim" ]; then
+ echo "The size of your folder is bigger, than that - "$dum_size"MB. Are you sure?"
+ echo "Keep the size and lose some files - Y, change the limit - N."
+
+ read answer
+
+ if [[ "$answer" == "N" ]]; then
+  while [ "$dum_size" -gt "$lim" ]; do
+   echo "Type your new limit or enter EXIT."
+   read lim
+
+   if [[ "$lim" == "EXIT" ]]; then
+   echo "Exiting the program..."
+   exit 0
+   fi
+  done
+ fi
+ if [[ "$answer" == "Y" ]]; then
+   echo "We will fill the folder to your chosen limit - some files will be DELETED"
+ fi
+fi
+
 #dd - копирование блочных данных с устройства /dev/zero(спец файл - источник  нулевых байтов)
 #в файл образа диска; bs - сколько байт читать и записывать
 #count - скопировать указанное кол-во блоков, размера bs
@@ -58,14 +85,17 @@ ln -s /mnt/limited_fol/"$name" "$dir"
 # cut -f1 - вырезаем поле(--fields[переченьLIST]) - название директории
 # Двойные скобки для решения арифметических операций
 # | - передаёт вывод предыдущей команды на вход следующей
+dum_size=$( du -s "$dir" | cut -f1 )
 folder_size=$( du -sL "$dir" | cut -f1 )
-folder_size=$(( folder_size / $lim ))
-folder_size=$(( folder_size / 10 ))  # Преобразуем в мегабайты и проценты
+folder_size=$(( folder_size - $dum_size))
+folder_size=$(( folder_size / 1024 ))
 
 # -h --human-readable format
 echo "The size of the folder is, out of "$lim"MB we've limited your folder to :)"
-du -shL "$dir"
+echo " "$folder_size"Mb - "$dir" "
 
+folder_size=$(( folder_size * 100))
+folder_size=$(( folder_size / $lim ))  # Преобразуем в проценты
 
 # Процент заполнения папки
 echo "How full is your folder in percents: $folder_size%"
